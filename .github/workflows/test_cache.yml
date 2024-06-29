@@ -1,0 +1,15 @@
+name: Test Ubicloud Cache
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - cache-testing
+
+jobs:
+  save:
+    uses: ./.github/workflows/cache_ops.yml
+
+  restore:
+    needs: save
+    uses: ./.github/workflows/cache_ops.yml

@@ -1,0 +1,92 @@
+name: Steps to test cache save and restore
+
+on: [workflow_call]
+
+jobs:
+  cache:
+    runs-on: ubicloud
+    env:
+      CACHE_VERSION: ${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create version file trigger fresh cache
+        run: |
+          echo "Cache version: ${{ env.CACHE_VERSION }}" >> cache/version.txt
+
+      - name: Generate random file to cache
+        run: dd if=/dev/urandom of=cache/100MB.tmp bs=1M count=100
+
+      - name: ubicloud/cache
+        uses: ubicloud/cache@v4
+        with:
+          path: cache/100MB.tmp 
+          key: cache-100MB-${{ env.CACHE_VERSION }}
+          
+      - name: ubicloud/setup-ruby
+        uses: ubicloud/setup-ruby@v1
+        with:
+          working-directory: cache/ruby
+          ruby-version: '3.3.3'
+          bundler-cache: true
+          cache-version: ${{ env.CACHE_VERSION }}
+
+      - name: ubicloud/setup-python
+        uses: ubicloud/setup-python@ubicloud-init
+        with:
+          python-version: '3.9'
+          cache: 'pip'
+          cache-dependency-path: |
+            cache/python/requirements.txt
+            cache/version.txt
+
+      - name: Install Python requirements
+        run: pip install -r cache/python/requirements.txt
+      
+      - name: ubicloud/setup-go
+        uses: ubicloud/setup-go@ubicloud-init
+        with:
+          go-version: '1.22'
+          cache-dependency-path: |
+            cache/go/go.sum
+            cache/version.txt
+
+      - name: Install Go requirements
+        run: cd cache/go && go mod vendor
+  
+      - name: ubicloud/setup-node
+        uses: ubicloud/setup-node@ubicloud-init
+        with:
+          cache: 'npm'
+          cache-dependency-path: |
+            cache/node/package-lock.json
+            cache/version.txt
+      
+      - name: Install Node requirements
+        run: cd cache/node && npm ci
+  
+      - name: ubicloud/setup-java
+        uses: ubicloud/setup-java@ubicloud-init 
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+          cache: gradle
+          cache-dependency-path: |
+            cache/java/build.gradle
+            cache/version.txt
+
+      - name: Install Java requirements
+        run: gradle downloadDependencies --no-daemon -p cache/java
+
+      - name: ubicloud/setup-dotnet
+        uses: ubicloud/setup-dotnet@ubicloud-init 
+        with:
+          dotnet-version: 3.1
+          cache: true
+          cache-dependency-path: |
+            cache/dotnet/packages.lock.json
+            cache/version.txt
+
+      - name: Install Dotnet requirements
+        run: dotnet restore --locked-mode cache/dotnet
