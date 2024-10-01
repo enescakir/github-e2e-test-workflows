@@ -79,14 +79,14 @@ jobs:
       - name: Install Java requirements
         run: gradle downloadDependencies --no-daemon -p cache/java
 
-      - name: ubicloud/setup-dotnet
-        uses: ubicloud/setup-dotnet@v4
-        with:
-          dotnet-version: 3.1
-          cache: true
-          cache-dependency-path: |
-            cache/dotnet/packages.lock.json
-            cache/version.txt
+      # - name: ubicloud/setup-dotnet
+      #   uses: ubicloud/setup-dotnet@v4
+      #   with:
+      #     dotnet-version: 3.1
+      #     cache: true
+      #     cache-dependency-path: |
+      #       cache/dotnet/packages.lock.json
+      #       cache/version.txt
 
-      - name: Install Dotnet requirements
-        run: dotnet restore --locked-mode cache/dotnet
+      # - name: Install Dotnet requirements
+      #   run: dotnet restore --locked-mode cache/dotnet
