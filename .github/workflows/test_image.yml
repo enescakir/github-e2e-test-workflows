@@ -54,5 +54,30 @@ jobs:
       - name: Check filesystem
         run: sudo fsck -nf || [ $? -eq 4 ]
       
+      - name: docker info
+        run: docker info
+
+      - name: ip a
+        run: ip a
+
+      - name: resolvectl status
+        run: resolvectl status
+
+      - name: Vm IPv4
+        run: ping -4 -c 2 google.com
+
+      - name: Vm IPv6
+        run: ping -6 -c 2 google.com
+
       - name: Check docker internet connectivity
         run: docker run alpine ping -c 2 google.com
+
+      - name: Docker IPv4
+        run: docker run alpine ping -4 -c 2 google.com
+
+      - if: failure()
+        run: sleep 6000000
+
+      # - name: Docker IPv6
+      #   run: docker run alpine ping -6 -c 2 google.com
+
