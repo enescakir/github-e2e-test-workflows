@@ -1,6 +1,9 @@
 name: Test ubuntu-2204
 
 on:
+  push:
+    branches:
+      - cache-test
   workflow_dispatch:
     inputs:
       arch:
@@ -13,6 +16,6 @@ jobs:
   test_image:
     uses: ./.github/workflows/test_all.yml
     with:
-      runner: ${{ inputs.arch == 'x64' && 'ubicloud-standard-2-ubuntu-2204' || 'ubicloud-standard-2-arm-ubuntu-2204' }}
+      runner: ubicloud-standard-2-ubuntu-2204
       image_os: ubuntu22
-      arch: ${{ inputs.arch }}
+      arch: x64
